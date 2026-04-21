@@ -101,7 +101,6 @@ public:
 
         level.BuildSegments();
 
-        // Спавн
         level.spawnPos = {120.0f, 420.0f};
 
         // Яблоки
@@ -111,11 +110,8 @@ public:
         Collectible a4; a4.pos = {1800.0f, 300.0f}; level.collectibles.Append(a4);
         Collectible a5; a5.pos = {2200.0f, 420.0f}; level.collectibles.Append(a5);
 
-        // Финиш
         level.finish.pos = {2400.0f, 420.0f};
 
-        // Шипы
-        /* Hazard h1; h1.pos = {1000.0f, 370.0f}; level.hazards.Append(h1);
-        Hazard h2; h2.pos = {1650.0f, 360.0f}; level.hazards.Append(h2); */
+        Hazard h; h.pos = {650.0f,  420.0f}; level.hazards.Append(h);
     }
 };
