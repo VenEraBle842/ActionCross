@@ -6,7 +6,7 @@
 struct Constraint {
     Particle* a         = nullptr;
     Particle* b         = nullptr;
-    float     restLength;                // собственная длина в состоянии покоя
+    float     restLength = 0.0f;         // собственная длина в состоянии покоя
     float     stiffness  = 1.0f;         // 0..1 (1 = жесткий стержень)
     float     damping    = 0.0f;         // гашение скорости вдоль оси пружины
 

@@ -144,6 +144,7 @@ private:
         CheckCollectibles();
         CheckHazards();
         CheckHeadCollision();
+        CheckFallOut();
 
         // Обновление активации финиша
         level.finish.active = level.AllCollected();
@@ -291,6 +292,17 @@ private:
 
     void CheckHeadCollision() {
         if (bike.IsHeadGrounded(level)) {
+            state = GameState::CRASHED;
+        }
+    }
+
+    // Порог Y, ниже которого байк считается упавшим в пропасть
+    static constexpr float FALL_DEATH_Y = 1200.0f;
+
+    // Проверка падения в пропасть
+    void CheckFallOut() {
+        olc::vf2d com = bike.GetCenterOfMass();
+        if (com.y > FALL_DEATH_Y) {
             state = GameState::CRASHED;
         }
     }
