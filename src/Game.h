@@ -76,7 +76,7 @@ public:
 private:
     // Инициализация / Сброс
     void InitGame() {
-        LevelLoader::CreateDefaultLevel(level);
+        CreateDefaultLevel(level);
         ResetBike();
     }
 
