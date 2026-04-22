@@ -1,76 +1,9 @@
 #pragma once
 
 #include "Level/Level.h"
-#include <fstream>
-#include <sstream>
-#include <string>
 
-// парсер текстовых файлов уровней
-class LevelLoader {
-public:
-    static bool Load(Level& level, const std::string& filepath) {
-        level.ClearAll();
-
-        std::ifstream file(filepath);
-        if (!file.is_open()) return false;
-
-        std::string line;
-        while (std::getline(file, line)) {
-            std::istringstream iss(line);
-            std::string token;
-            iss >> token;
-
-            if (token == "VERTICES") {
-                int count;
-                iss >> count;
-                for (int i = 0; i < count && std::getline(file, line); i++) {
-                    std::istringstream viss(line);
-                    float x, y;
-                    viss >> x >> y;
-                    level.vertices.Append({x, y});
-                }
-            }
-            else if (token == "APPLES") {
-                int count;
-                iss >> count;
-                for (int i = 0; i < count && std::getline(file, line); i++) {
-                    std::istringstream aiss(line);
-                    float x, y;
-                    aiss >> x >> y;
-                    Collectible apple;
-                    apple.pos = {x, y};
-                    level.collectibles.Append(apple);
-                }
-            }
-            else if (token == "FINISH") {
-                float x, y;
-                iss >> x >> y;
-                level.finish.pos = {x, y};
-            }
-            else if (token == "HAZARDS") {
-                int count;
-                iss >> count;
-                for (int i = 0; i < count && std::getline(file, line); i++) {
-                    std::istringstream hiss(line);
-                    float x, y;
-                    hiss >> x >> y;
-                    Hazard h;
-                    h.pos = {x, y};
-                    level.hazards.Append(h);
-                }
-            }
-            else if (token == "SPAWN") {
-                float x, y;
-                iss >> x >> y;
-                level.spawnPos = {x, y};
-            }
-        }
-
-        level.BuildSegments();
-        return true;
-    }
-
-    static void CreateDefaultLevel(Level& level) {
+namespace LevelLoader {
+    inline void CreateDefaultLevel(Level& level) {
         level.ClearAll();
 
         // Холмистый полигональный ландшафт (по часовой стрелке = земля снаружи)
