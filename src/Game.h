@@ -119,9 +119,8 @@ private:
         DrawString(50, y,       "Controls:", olc::Pixel(150, 200, 255));
         DrawString(50, y + 15,  "  UP / W     - Throttle", olc::WHITE);
         DrawString(50, y + 27,  "  DOWN / S   - Brake", olc::WHITE);
-        DrawString(50, y + 39,  "  LEFT / RIGHT - Lean", olc::WHITE);
-        DrawString(50, y + 51,  "  SPACE      - Flip direction", olc::WHITE);
-        DrawString(50, y + 63,  "  R          - Restart", olc::WHITE);
+        DrawString(50, y + 39,  "  SPACE      - Flip direction", olc::WHITE);
+        DrawString(50, y + 51,  "  R          - Restart", olc::WHITE);
 
         DrawString(ScreenWidth() / 2 - 100, ScreenHeight() - 60,
                    "Press ENTER or SPACE to start",
@@ -244,15 +243,7 @@ private:
             bike.Brake();
         }
 
-        // Наклон влево
-        if (GetKey(olc::Key::LEFT).bHeld || GetKey(olc::Key::A).bHeld) {
-            bike.Lean(-1.0f, dt);
-        }
 
-        // Наклон вправо
-        if (GetKey(olc::Key::RIGHT).bHeld || GetKey(olc::Key::D).bHeld) {
-            bike.Lean(1.0f, dt);
-        }
 
         // Смена направления
         if (GetKey(olc::Key::SPACE).bPressed) {

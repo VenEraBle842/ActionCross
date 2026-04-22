@@ -43,7 +43,7 @@ public:
     // Настройки параметров
     float throttleForce   = 7500.0f;
     float brakeStrength   = 0.90f;
-    float rotationForce   = 3500.0f;
+
 
     // Инициализация мотоцикла на позиции спавна
     void Init(olc::vf2d spawnPos) {
@@ -111,9 +111,6 @@ public:
         rearWheel.ApplyForce(force);
         // Противодействующая сила на переднее колесо (3-й закон Ньютона, уменьшенная)
         frontWheel.ApplyForce(-force * 0.2f);
-
-        // Угловая скорость для визуализации вращения колеса
-        rearWheel.angularVel += throttleForce * dt / rearWheel.radius * direction;
     }
 
     // Тормоз: гасим скорость колес
@@ -126,19 +123,7 @@ public:
         frontWheel.angularVel *= brakeStrength;
     }
 
-    // Наклон: создаем вращающий момент через пару сил
-    void Lean(float dir, float dt) {
-        olc::vf2d bikeAxis = (frontWheel.pos - rearWheel.pos);
-        olc::vf2d perp = bikeAxis.perp().norm();
 
-        // Основной крутящий момент: тело и голова толкаются по перпендикуляру
-        body.ApplyForce(perp * rotationForce * dir);
-        head.ApplyForce(perp * rotationForce * dir * 0.7f);
-
-        // Контр-момент на колеса (пара сил = чистый крутящий момент)
-        frontWheel.ApplyForce(-perp * rotationForce * dir * 0.45f);
-        rearWheel.ApplyForce(-perp * rotationForce * dir * 0.45f);
-    }
 
     // Смена направления
     void FlipDirection() {

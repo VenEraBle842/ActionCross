@@ -45,6 +45,15 @@ struct Particle {
 
         // Обновление поворота колеса на основе угловой скорости
         if (radius > 0.01f) {
+            if (grounded) {
+                // На земле: синхронизируем визуальное вращение с реальной скоростью
+                // чтобы ведомое колесо мгновенно отражало направление движения
+                float tangentSpeed = velocity.dot(groundTangent);
+                angularVel = tangentSpeed / (radius * dt);
+            } else {
+                // В воздухе: постепенно замедляем вращение
+                angularVel *= 0.995f;
+            }
             angle += angularVel * dt;
         }
 
