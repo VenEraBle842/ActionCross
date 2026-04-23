@@ -43,7 +43,7 @@ public:
     // Настройки параметров
     float throttleForce   = 7500.0f;
     float brakeStrength   = 0.90f;
-
+    float airThrottleSpin = 15.0f;   // скорость раскрутки колеса в воздухе (рад/с^2)
 
     // Инициализация мотоцикла на позиции спавна
     void Init(olc::vf2d spawnPos) {
@@ -91,39 +91,42 @@ public:
 
     // Газ: толкаем заднее колесо вдоль поверхности земли
     void Throttle(float dt) {
-        olc::vf2d driveDir;
-
         if (rearWheel.grounded) {
-            // Едем по направлению касательной к реальной поверхности земли
-            driveDir = rearWheel.groundTangent;
+            // На земле: едем по направлению касательной к реальной поверхности
+            olc::vf2d driveDir = rearWheel.groundTangent;
             // Убеждаемся, что направление движения совпадает с направлением мотоцикла
             olc::vf2d bikeAxis = (frontWheel.pos - rearWheel.pos);
             if (bikeAxis.dot(driveDir) < 0) {
-                driveDir = -driveDir;  // разворачиваем касательную для совпадения с ориентацией байка
+                driveDir = -driveDir;
             }
             driveDir = driveDir * direction;
+
+            olc::vf2d force = driveDir * throttleForce;
+            rearWheel.ApplyForce(force);
+            // Противодействующая сила на переднее колесо (3-й закон Ньютона, уменьшенная)
+            frontWheel.ApplyForce(-force * 0.2f);
         } else {
-            // В воздухе: используем ось рамы мотоцикла
-            driveDir = (frontWheel.pos - rearWheel.pos).norm() * direction;
+            // В воздухе: нет сцепления с дорогой — только раскручиваем колесо
+            rearWheel.angularVel += direction * airThrottleSpin * dt;
         }
-
-        olc::vf2d force = driveDir * throttleForce;
-        rearWheel.ApplyForce(force);
-        // Противодействующая сила на переднее колесо (3-й закон Ньютона, уменьшенная)
-        frontWheel.ApplyForce(-force * 0.2f);
     }
 
-    // Тормоз: гасим скорость колес
+    // Тормоз: гасим скорость колес (только на земле замедляет движение байка)
     void Brake() {
-        olc::vf2d rearVel  = rearWheel.GetVelocity();
-        olc::vf2d frontVel = frontWheel.GetVelocity();
-        rearWheel.SetVelocity(rearVel * brakeStrength);
-        frontWheel.SetVelocity(frontVel * brakeStrength);
-        rearWheel.angularVel  *= brakeStrength;
-        frontWheel.angularVel *= brakeStrength;
+        if (rearWheel.grounded || frontWheel.grounded) {
+            // На земле: полное торможение — гасим и линейную скорость, и вращение
+            olc::vf2d rearVel  = rearWheel.GetVelocity();
+            olc::vf2d frontVel = frontWheel.GetVelocity();
+            rearWheel.SetVelocity(rearVel * brakeStrength);
+            frontWheel.SetVelocity(frontVel * brakeStrength);
+            rearWheel.angularVel  *= brakeStrength;
+            frontWheel.angularVel *= brakeStrength;
+        } else {
+            // В воздухе: нет опоры — тормоз лишь замедляет вращение колес
+            rearWheel.angularVel  *= brakeStrength;
+            frontWheel.angularVel *= brakeStrength;
+        }
     }
-
-
 
     // Смена направления
     void FlipDirection() {
