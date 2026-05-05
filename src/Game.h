@@ -123,8 +123,8 @@ private:
         Clear(olc::Pixel(30, 30, 50));
 
         std::string title = "ACTION CROSS";
-        DrawString(ScreenWidth() / 2 - (int)title.size() * 4, ScreenHeight() / 3,
-                   title, olc::Pixel(255, 200, 50), 2);
+        DrawString(ScreenWidth() / 2 - (int)title.size() * 11, ScreenHeight() / 3,
+                   title, olc::Pixel(255, 200, 50), 3);
 
         int y = ScreenHeight() / 2 + 20;
         DrawString(50, y,       "Controls:", olc::Pixel(150, 200, 255));
@@ -134,7 +134,7 @@ private:
         DrawString(50, y + 51,  "  SHIFT      - Jump", olc::WHITE);
         DrawString(50, y + 63,  "  R          - Restart", olc::WHITE);
 
-        DrawString(ScreenWidth() / 2 - 100, ScreenHeight() - 60,
+        DrawString(ScreenWidth() / 2 - (int)title.size() * 11, ScreenHeight() - 60,
                    "Press ENTER or SPACE to select level",
                    HAZARD_COLOR);
     }
