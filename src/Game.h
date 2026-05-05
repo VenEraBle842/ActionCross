@@ -4,11 +4,9 @@
 #include "GameState.h"
 #include "Physics/PhysicsWorld.h"
 #include "Bike/Bike.h"
-#include "Level/Level.h"
 #include "Level/LevelLoader.h"
 #include "Camera.h"
 #include <string>
-#include <cmath>
 
 class Game : public olc::PixelGameEngine {
 public:
@@ -32,6 +30,11 @@ private:
     // Игровой таймер
     float gameTime = 0.0f;
 
+    // Прогрессия уровней
+    int unlockedLevel = 1;
+    int currentLevel = 1;
+    const int MAX_LEVELS = 3;
+
     // Цвета
     const olc::Pixel SKY_TOP       = olc::Pixel(100, 150, 220);
     const olc::Pixel SKY_BOTTOM    = olc::Pixel(180, 210, 240);
@@ -47,7 +50,7 @@ private:
 
 public:
     bool OnUserCreate() override {
-        InitGame();
+        LoadProgress();
         return true;
     }
 
@@ -58,6 +61,9 @@ public:
         switch (state) {
             case GameState::MENU:
                 UpdateMenu(dt);
+                break;
+            case GameState::LEVEL_SELECT:
+                UpdateLevelSelect(dt);
                 break;
             case GameState::PLAYING:
                 UpdatePlaying(dt);
@@ -74,10 +80,15 @@ public:
     }
 
 private:
-    // Инициализация / Сброс
-    void InitGame() {
-        CreateDefaultLevel(level);
-        ResetBike();
+    void LoadProgress() {
+        if (std::ifstream file("save.dat"); file.is_open())
+            file >> unlockedLevel;
+        else unlockedLevel = 1;
+    }
+
+    void SaveProgress() {
+        if (std::ofstream file("save.dat"); file.is_open())
+            file << unlockedLevel;
     }
 
     void ResetBike() {
@@ -104,8 +115,8 @@ private:
 
     void UpdateMenu(float dt) {
         if (GetKey(olc::Key::ENTER).bPressed || GetKey(olc::Key::SPACE).bPressed) {
-            state = GameState::PLAYING;
-            ResetBike();
+            LoadProgress();
+            state = GameState::LEVEL_SELECT;
         }
 
         // Отрисовка меню
@@ -120,11 +131,45 @@ private:
         DrawString(50, y + 15,  "  UP / W     - Throttle", olc::WHITE);
         DrawString(50, y + 27,  "  DOWN / S   - Brake", olc::WHITE);
         DrawString(50, y + 39,  "  SPACE      - Flip direction", olc::WHITE);
-        DrawString(50, y + 51,  "  R          - Restart", olc::WHITE);
+        DrawString(50, y + 51,  "  SHIFT      - Jump", olc::WHITE);
+        DrawString(50, y + 63,  "  R          - Restart", olc::WHITE);
 
         DrawString(ScreenWidth() / 2 - 100, ScreenHeight() - 60,
-                   "Press ENTER or SPACE to start",
-                   olc::Pixel(200, 200, 200));
+                   "Press ENTER or SPACE to select level",
+                   HAZARD_COLOR);
+    }
+
+    // СОСТОЯНИЕ УРОВНЕЙ
+
+    void UpdateLevelSelect(float dt) {
+        Clear(olc::Pixel(20, 20, 40));
+        DrawString(50, 30, "LEVEL SELECTION", olc::CYAN, 3);
+        DrawString(50, 70, "Press ESC to return to main menu", olc::DARK_GREY, 1);
+        DrawString(50, 90, "Press DEL to reset progress", olc::DARK_GREY, 1);
+
+        if (GetKey(olc::Key::DEL).bPressed) {
+            unlockedLevel = 1;
+            SaveProgress();
+        }
+
+        for (int i = 1; i <= MAX_LEVELS; ++i) {
+            bool isUnlocked = (i <= unlockedLevel);
+            olc::Pixel color = isUnlocked ? olc::WHITE : olc::DARK_GREY;
+            std::string prefix = isUnlocked ? "[ ] " : "[X] ";
+
+            DrawString(70, 130 + i * 40, prefix + "Level " + std::to_string(i), color, 2);
+
+            if (isUnlocked && GetKey(static_cast<olc::Key>((int)olc::Key::K1 + i - 1)).bPressed) {
+                currentLevel = i;
+                LevelLoader::LoadFromAclvl(level, "assets/level_" + std::to_string(i) + ".aclvl");
+                state = GameState::PLAYING;
+                ResetBike();
+            }
+        }
+
+        if (GetKey(olc::Key::ESCAPE).bPressed) {
+            state = GameState::MENU;
+        }
     }
 
     //  СОСТОЯНИЕ ИГРЫ
@@ -185,7 +230,7 @@ private:
             ResetBike();
         }
         if (GetKey(olc::Key::ESCAPE).bPressed) {
-            state = GameState::MENU;
+            state = GameState::LEVEL_SELECT;
         }
 
         RenderWorld();
@@ -205,12 +250,22 @@ private:
     void UpdateLevelCleared(float dt) {
         camera.Update(dt);
 
+        static bool progressSaved = false;
+        if (!progressSaved) {
+            if (currentLevel == unlockedLevel && unlockedLevel < MAX_LEVELS) {
+                unlockedLevel++;
+                SaveProgress();
+            }
+            progressSaved = true;
+        }
+
         if (GetKey(olc::Key::R).bPressed || GetKey(olc::Key::ENTER).bPressed) {
             state = GameState::PLAYING;
             ResetBike();
         }
         if (GetKey(olc::Key::ESCAPE).bPressed) {
-            state = GameState::MENU;
+            progressSaved = false;
+            state = GameState::LEVEL_SELECT;
         }
 
         RenderWorld();
@@ -244,11 +299,16 @@ private:
             bike.Brake();
         }
 
-
-
         // Смена направления
         if (GetKey(olc::Key::SPACE).bPressed) {
             bike.FlipDirection();
+        }
+
+        // Вертикальный прыжок
+        if (GetKey(olc::Key::SHIFT).bPressed) {
+            if (bike.frontWheel.grounded && bike.rearWheel.grounded) {
+                bike.Jump(3.5f);
+            }
         }
     }
 

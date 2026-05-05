@@ -44,3 +44,9 @@ if(WIN32)
             user32 gdi32 opengl32 gdiplus Shlwapi dwmapi
     )
 endif()
+
+add_custom_command(TARGET ActionCross POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:ActionCross>/assets"
+)

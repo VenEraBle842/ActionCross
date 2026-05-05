@@ -133,6 +133,14 @@ public:
         direction *= -1.0f;
     }
 
+    void Jump(float impulse) {
+        // Смещаем старую позицию вниз, чтобы на следующем шаге частицы вытолкнуло вверх
+        frontWheel.oldPos.y += impulse;
+        rearWheel.oldPos.y  += impulse;
+        body.oldPos.y       += impulse;
+        // Голову потянет за собой шея, что создаст реалистичный рывок назад при прыжке
+    }
+
     // Получить центр масс (для цели камеры)
     olc::vf2d GetCenterOfMass() const {
         float totalMass = frontWheel.mass + rearWheel.mass + body.mass + head.mass;
