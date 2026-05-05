@@ -53,6 +53,8 @@ public:
         float bodyMass    = 1.0f;
         float headMass    = 0.5f;
 
+        direction = 1.0f;
+
         // Позиционируем узлы относительно точки спавна
         frontWheel = Particle(spawnPos + olc::vf2d(40.0f * direction, 0.0f),
                               wheelMass, wheelRadius);
@@ -62,8 +64,6 @@ public:
                               bodyMass, 0.0f); // без коллизий
         head       = Particle(spawnPos + olc::vf2d(5.0f * direction, -55.0f),
                               headMass, headRadius);
-
-        direction = 1.0f;
 
         // Создаем ограничения с измеренными длинами покоя
         frame     = Constraint(&frontWheel, &rearWheel, 0.9f, 0.05f);
