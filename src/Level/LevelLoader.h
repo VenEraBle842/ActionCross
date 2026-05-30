@@ -4,17 +4,25 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 
+// Статический утилитный класс для работы с файлами уровней формата .aclvl
 class LevelLoader {
 public:
+    // Утилита для динамической проверки наличия уровней
+    static bool Exists(const std::string& filepath) {
+        std::ifstream file(filepath);
+        return file.is_open();
+    }
+
     static void LoadFromAclvl(Level& level, const std::string& filepath) {
-        level.ClearAll(); // очищаем старые данные
+        level.ClearAll();
 
         std::ifstream file(filepath);
         if (!file.is_open()) {
             std::cerr << "[ERROR] Could not load the level: " << filepath << std::endl;
             return;
-        } // если файла нет, останется пустой уровень
+        }
 
         std::string line;
         while (std::getline(file, line)) {
@@ -26,33 +34,23 @@ public:
 
             if (type == "SPAWN") {
                 float x, y;
-                if (ss >> x >> y) level.spawnPos = {x, y};
+                if (ss >> x >> y) level.SetSpawnPos({x, y});
             } else if (type == "FINISH") {
                 float x, y;
-                if (ss >> x >> y) level.finish.pos = {x, y};
+                // Level забирает владение выделенной памятью
+                if (ss >> x >> y) level.SetFinish(new Finish({x, y}));
             } else if (type == "APPLE") {
                 float x, y;
-                if (ss >> x >> y) {
-                    Collectible c;
-                    c.pos = {x, y};
-                    level.collectibles.Append(c);
-                }
+                if (ss >> x >> y) level.AddCollectible(new Collectible({x, y}));
             } else if (type == "SPIKE") {
                 float x, y;
-                if (ss >> x >> y) {
-                    Hazard h;
-                    h.pos = {x, y};
-                    level.hazards.Append(h);
-                }
+                if (ss >> x >> y) level.AddHazard(new Hazard({x, y}));
             } else if (type == "TERRAIN") {
                 float x, y;
-                // очищаем вершины перед сборкой нового полигона
-                while (level.vertices.GetLength() > 0) level.vertices.RemoveLast();
-
                 while (ss >> x >> y) {
-                    level.vertices.Append({x, y});
+                    level.AddVertex({x, y});
                 }
-                level.BuildSegments(); // преобразуем вершины в отрезки коллизий
+                level.BuildSegments();
             }
         }
     }

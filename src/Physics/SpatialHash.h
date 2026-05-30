@@ -28,23 +28,25 @@ public:
         float maxX = std::max(p1.x, p2.x) + margin;
         float maxY = std::max(p1.y, p2.y) + margin;
 
-        int x0 = (int)std::floor(minX / cellSize);
-        int y0 = (int)std::floor(minY / cellSize);
-        int x1 = (int)std::floor(maxX / cellSize);
-        int y1 = (int)std::floor(maxY / cellSize);
+        int x0 = static_cast<int>(std::floor(minX / cellSize));
+        int y0 = static_cast<int>(std::floor(minY / cellSize));
+        int x1 = static_cast<int>(std::floor(maxX / cellSize));
+        int y1 = static_cast<int>(std::floor(maxY / cellSize));
 
-        for (int y = y0; y <= y1; y++)
-            for (int x = x0; x <= x1; x++)
+        for (int y = y0; y <= y1; y++) {
+            for (int x = x0; x <= x1; x++) {
                 cells[HashKey(x, y)].Append(segIndex);
+            }
+        }
     }
 
     // Запрос: возвращает все индексы отрезков, которые могут пересекаться с AABB
     MutableArraySequence<int> Query(olc::vf2d pos, float radius) const {
         MutableArraySequence<int> result;
-        int x0 = (int)std::floor((pos.x - radius) / cellSize);
-        int y0 = (int)std::floor((pos.y - radius) / cellSize);
-        int x1 = (int)std::floor((pos.x + radius) / cellSize);
-        int y1 = (int)std::floor((pos.y + radius) / cellSize);
+        int x0 = static_cast<int>(std::floor((pos.x - radius) / cellSize));
+        int y0 = static_cast<int>(std::floor((pos.y - radius) / cellSize));
+        int x1 = static_cast<int>(std::floor((pos.x + radius) / cellSize));
+        int y1 = static_cast<int>(std::floor((pos.y + radius) / cellSize));
 
         for (int y = y0; y <= y1; y++) {
             for (int x = x0; x <= x1; x++) {
@@ -70,6 +72,7 @@ public:
                 }
                 result[j + 1] = key;
             }
+
             // Удаление идущих подряд дубликатов
             MutableArraySequence<int> unique;
             unique.Append(result[0]);
@@ -88,6 +91,6 @@ private:
     std::unordered_map<int64_t, MutableArraySequence<int>> cells;
 
     static int64_t HashKey(int x, int y) {
-        return ((int64_t)x << 32) | (int64_t)(uint32_t)y;
+        return (static_cast<int64_t>(x) << 32) | static_cast<int64_t>(static_cast<uint32_t>(y));
     }
 };
