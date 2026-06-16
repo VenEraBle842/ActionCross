@@ -14,7 +14,7 @@ public:
         }
     }
 
-    void SaveProgress() {
+    void SaveProgress() const {
         if (std::ofstream file("save.dat"); file.is_open()) {
             file << unlockedLevel;
         }

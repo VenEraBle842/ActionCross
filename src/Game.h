@@ -37,14 +37,12 @@ public:
         sAppName = "ActionCross";
     }
 
-    ~Game() {
+    ~Game() override {
         if (currentState) {
             currentState->OnExit(this);
             delete currentState;
         }
-        if (nextState) {
             delete nextState;
-        }
     }
 
     bool OnUserCreate() override;
@@ -239,7 +237,7 @@ inline void StateLevelSelect::Update(Game* game, float dt) {
 }
 
 inline void StateLevelSelect::Render(Game* game) {
-    game->Clear(olc::Pixel(20, 20, 40));
+    game->Clear(olc::Pixel(30, 30, 50));
     game->DrawString(50, 30, "LEVEL SELECTION", olc::CYAN, 3);
     game->DrawString(50, 70, "Press ESC to return to main menu", olc::DARK_GREY, 1);
     game->DrawString(50, 90, "Press DEL to reset progress", olc::DARK_GREY, 1);

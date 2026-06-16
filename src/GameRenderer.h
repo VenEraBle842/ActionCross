@@ -59,7 +59,7 @@ public:
             if (!c->IsActive()) continue;
 
             olc::vf2d sp = camera.WorldToScreen(c->GetPos(), screen);
-            int32_t radius = static_cast<int32_t>(c->GetRadius() * camera.GetZoom());
+            auto radius = static_cast<int32_t>(c->GetRadius() * camera.GetZoom());
 
             pge->FillCircle(static_cast<int32_t>(sp.x), static_cast<int32_t>(sp.y), radius, APPLE_COLOR);
             pge->DrawCircle(static_cast<int32_t>(sp.x), static_cast<int32_t>(sp.y), radius, olc::Pixel(180, 20, 20));
@@ -77,7 +77,7 @@ public:
         for (int i = 0; i < level.GetHazardsCount(); i++) {
             auto h = level.GetHazard(i);
             olc::vf2d sp = camera.WorldToScreen(h->GetPos(), screen);
-            int32_t r = static_cast<int32_t>(h->GetRadius() * camera.GetZoom());
+            auto r = static_cast<int32_t>(h->GetRadius() * camera.GetZoom());
 
             for (int j = 0; j < 5; j++) {
                 float angle = static_cast<float>(j) * 3.14159f * 2.0f / 5.0f - 3.14159f / 2.0f;
@@ -101,7 +101,7 @@ public:
         olc::vf2d sp = camera.WorldToScreen(f->GetPos(), screen);
         olc::Pixel color = f->IsActive() ? olc::Pixel(255, 255, 50) : olc::Pixel(100, 100, 80);
 
-        int32_t r = static_cast<int32_t>(f->GetRadius() * camera.GetZoom());
+        auto r = static_cast<int32_t>(f->GetRadius() * camera.GetZoom());
         for (int j = 0; j < 6; j++) {
             float angle = static_cast<float>(j) * 3.14159f / 3.0f;
             olc::vf2d petalPos = sp + olc::vf2d(std::cos(angle), std::sin(angle)) * static_cast<float>(r - 2);
@@ -128,7 +128,7 @@ public:
         pge->DrawLine(static_cast<int32_t>(bd.x), static_cast<int32_t>(bd.y),
                       static_cast<int32_t>(hd.x), static_cast<int32_t>(hd.y), BODY_COLOR);
 
-        int32_t wheelR = static_cast<int32_t>(bike.GetFrontWheel().GetRadius() * camera.GetZoom());
+        auto wheelR = static_cast<int32_t>(bike.GetFrontWheel().GetRadius() * camera.GetZoom());
 
         auto renderWheel = [&](olc::vf2d pos, float angle) {
             pge->DrawCircle(static_cast<int32_t>(pos.x), static_cast<int32_t>(pos.y), wheelR, WHEEL_COLOR);
@@ -148,7 +148,7 @@ public:
         pge->FillCircle(static_cast<int32_t>(bd.x), static_cast<int32_t>(bd.y),
                         static_cast<int32_t>(5.0f * camera.GetZoom()), BODY_COLOR);
 
-        int32_t headR = static_cast<int32_t>(bike.GetHead().GetRadius() * camera.GetZoom());
+        auto headR = static_cast<int32_t>(bike.GetHead().GetRadius() * camera.GetZoom());
         pge->FillCircle(static_cast<int32_t>(hd.x), static_cast<int32_t>(hd.y), headR, HEAD_COLOR);
         pge->DrawCircle(static_cast<int32_t>(hd.x), static_cast<int32_t>(hd.y), headR, olc::Pixel(200, 160, 120));
     }

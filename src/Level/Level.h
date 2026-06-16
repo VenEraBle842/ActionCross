@@ -24,13 +24,13 @@ public:
 
 class Collectible : public Interactable {
 public:
-    Collectible(olc::vf2d p) : Interactable(p, 15.0f) {}
+    explicit Collectible(olc::vf2d p) : Interactable(p, 15.0f) {}
     void OnInteract() override { SetActive(false); }
 };
 
 class Finish : public Interactable {
 public:
-    Finish(olc::vf2d p) : Interactable(p, 15.0f) {
+    explicit Finish(olc::vf2d p) : Interactable(p, 15.0f) {
         SetActive(false); // Финиш активируется только после сбора всех collectibles
     }
     void OnInteract() override {}
@@ -38,7 +38,7 @@ public:
 
 class Hazard : public Interactable {
 public:
-    Hazard(olc::vf2d p) : Interactable(p, 12.0f) {}
+    explicit Hazard(olc::vf2d p) : Interactable(p, 12.0f) {}
     void OnInteract() override {}
 };
 
@@ -118,9 +118,7 @@ public:
     void AddHazard(Hazard* h) { hazards.Append(h); }
 
     void SetFinish(Finish* f) {
-        if (finish != nullptr) {
-            delete finish;
-        }
+        delete finish;
         finish = f;
     }
 
