@@ -64,10 +64,9 @@ public:
             olc::vf2d driveDir = rearWheel.GetGroundTangent();
             olc::vf2d bikeAxis = (frontWheel.GetPos() - rearWheel.GetPos());
 
-            if (bikeAxis.dot(driveDir) < 0) {
+            if (bikeAxis.dot(driveDir) < 0)
                 driveDir = -driveDir;
-            }
-            driveDir = driveDir * direction;
+            driveDir *= direction;
 
             olc::vf2d force = driveDir * throttleForce;
             rearWheel.ApplyForce(force);
@@ -120,10 +119,13 @@ public:
     // Проверка дистанции от всех узлов байка до целевой точки
     bool IsCloseTo(olc::vf2d targetPos, float threshold) const {
         float thresholdSq = threshold * threshold;
-        if ((frontWheel.GetPos() - targetPos).mag2() < thresholdSq) return true;
-        if ((rearWheel.GetPos() - targetPos).mag2() < thresholdSq) return true;
-        if ((body.GetPos() - targetPos).mag2() < thresholdSq) return true;
-        if ((head.GetPos() - targetPos).mag2() < thresholdSq) return true;
+        const Particle* particles[] = { &frontWheel, &rearWheel, &body, &head };
+
+        for (const Particle* particle : particles) {
+            if ((particle->GetPos() - targetPos).mag2() < thresholdSq) {
+                return true;
+            }
+        }
         return false;
     }
 

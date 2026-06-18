@@ -8,12 +8,6 @@
 #include "ProgressManager.h"
 #include <algorithm>
 
-class StateMenu;
-class StateLevelSelect;
-class StatePlay;
-class StateCrash;
-class StateFinish;
-
 class Game : public olc::PixelGameEngine {
     PhysicsWorld physics;
     Level level;
@@ -111,6 +105,21 @@ public:
     int GetCurrentLevelIndex() const { return currentLevelIndex; }
     void SetCurrentLevelIndex(int idx) { currentLevelIndex = idx; }
     int GetTotalLevels() const { return totalLevels; }
+
+    void UpdatePhysics(float dt) {
+        AddAccumulator(dt);
+        if (accumulator > 0.1f) accumulator = 0.1f;
+
+        while (accumulator >= PHYSICS_DT) {
+            physics.Step(PHYSICS_DT);
+            accumulator -= PHYSICS_DT;
+        }
+    }
+
+    void UpdateCamera(float dt) {
+        camera.SetTarget(bike.GetCenterOfMass());
+        camera.Update(dt);
+    }
 };
 
 // ОБЪЯВЛЕНИЯ КЛАССОВ СОСТОЯНИЙ
@@ -270,8 +279,6 @@ inline void StateLevelSelect::Render(Game* game) {
 inline void StatePlay::Update(Game* game, float dt) {
     Bike& bike = game->GetBike();
     Level& level = game->GetLevel();
-    PhysicsWorld& physics = game->GetPhysics();
-    Camera& camera = game->GetCamera();
 
     game->AddGameTime(dt);
 
@@ -299,14 +306,8 @@ inline void StatePlay::Update(Game* game, float dt) {
         bike.Brake();
     }
 
-    game->AddAccumulator(dt);
-    while (game->GetAccumulator() >= game->GetPhysicsDt()) {
-        physics.Step(game->GetPhysicsDt());
-        game->SubAccumulator(game->GetPhysicsDt());
-    }
-
-    camera.SetTarget(bike.GetCenterOfMass());
-    camera.Update(dt);
+    game->UpdatePhysics(dt);
+    game->UpdateCamera(dt);
 
     float fallDeathY = level.GetLowestPoint() + 400.0f;
     if (bike.GetCenterOfMass().y > fallDeathY) {
@@ -355,14 +356,8 @@ inline void StatePlay::Render(Game* game) {
 
 // 4. STATE CRASH
 inline void StateCrash::Update(Game* game, float dt) {
-    game->AddAccumulator(dt);
-    while (game->GetAccumulator() >= game->GetPhysicsDt()) {
-        game->GetPhysics().Step(game->GetPhysicsDt());
-        game->SubAccumulator(game->GetPhysicsDt());
-    }
-
-    game->GetCamera().SetTarget(game->GetBike().GetCenterOfMass());
-    game->GetCamera().Update(dt);
+    game->UpdatePhysics(dt);
+    game->UpdateCamera(dt);
 
     if (game->GetKey(olc::Key::ENTER).bPressed || game->GetKey(olc::Key::R).bPressed) {
         game->ResetLevel();
@@ -383,14 +378,8 @@ inline void StateCrash::Render(Game* game) {
 inline void StateFinish::Update(Game* game, float dt) {
     game->GetBike().Brake();
 
-    game->AddAccumulator(dt);
-    while (game->GetAccumulator() >= game->GetPhysicsDt()) {
-        game->GetPhysics().Step(game->GetPhysicsDt());
-        game->SubAccumulator(game->GetPhysicsDt());
-    }
-
-    game->GetCamera().SetTarget(game->GetBike().GetCenterOfMass());
-    game->GetCamera().Update(dt);
+    game->UpdatePhysics(dt);
+    game->UpdateCamera(dt);
 
     if (game->GetKey(olc::Key::ENTER).bPressed) {
         if (game->NextLevel()) {

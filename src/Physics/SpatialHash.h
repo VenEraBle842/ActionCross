@@ -12,6 +12,16 @@
 // которые перекрывают ее. Запрос по AABB (ограничивающему прямоугольнику)
 // позволяет быстро получить кандидатов для проверки.
 class SpatialHash {
+    std::unordered_map<int64_t, MutableArraySequence<int>> cells;
+
+    static int64_t HashKey(int x, int y) {
+        return (static_cast<int64_t>(x) << 32) | static_cast<int64_t>(static_cast<uint32_t>(y));
+    }
+
+    int GetCellIndex(float coordinate) const {
+        return static_cast<int>(std::floor(coordinate / cellSize));
+    }
+
 public:
     float cellSize = 64.0f;
 
@@ -28,10 +38,10 @@ public:
         float maxX = std::max(p1.x, p2.x) + margin;
         float maxY = std::max(p1.y, p2.y) + margin;
 
-        int x0 = static_cast<int>(std::floor(minX / cellSize));
-        int y0 = static_cast<int>(std::floor(minY / cellSize));
-        int x1 = static_cast<int>(std::floor(maxX / cellSize));
-        int y1 = static_cast<int>(std::floor(maxY / cellSize));
+        int x0 = GetCellIndex(minX);
+        int y0 = GetCellIndex(minY);
+        int x1 = GetCellIndex(maxX);
+        int y1 = GetCellIndex(maxY);
 
         for (int y = y0; y <= y1; y++) {
             for (int x = x0; x <= x1; x++) {
@@ -85,12 +95,5 @@ public:
         }
 
         return result;
-    }
-
-private:
-    std::unordered_map<int64_t, MutableArraySequence<int>> cells;
-
-    static int64_t HashKey(int x, int y) {
-        return (static_cast<int64_t>(x) << 32) | static_cast<int64_t>(static_cast<uint32_t>(y));
     }
 };

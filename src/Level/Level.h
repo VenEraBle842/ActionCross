@@ -5,7 +5,6 @@
 
 // Полиморфный базовый класс для интерактивных сущностей на уровне
 class Interactable {
-protected:
     olc::vf2d pos;
     float radius;
     bool active;
@@ -59,6 +58,16 @@ private:
 
     olc::vf2d spawnPos = {150.0f, 400.0f};
 
+    template <class T>
+    static void ClearPointersArray(MutableArraySequence<T*>& arr) {
+        for (int i = 0; i < arr.GetLength(); i++) {
+            delete arr.Get(i);
+        }
+        while (arr.GetLength() > 0) {
+            arr.RemoveLast();
+        }
+    }
+
 public:
     Level() = default;
 
@@ -73,11 +82,8 @@ public:
         while (vertices.GetLength() > 0) vertices.RemoveLast();
         while (segments.GetLength() > 0) segments.RemoveLast();
 
-        for (int i = 0; i < collectibles.GetLength(); i++) delete collectibles.Get(i);
-        while (collectibles.GetLength() > 0) collectibles.RemoveLast();
-
-        for (int i = 0; i < hazards.GetLength(); i++) delete hazards.Get(i);
-        while (hazards.GetLength() > 0) hazards.RemoveLast();
+        ClearPointersArray(collectibles);
+        ClearPointersArray(hazards);
 
         if (finish != nullptr) {
             delete finish;
